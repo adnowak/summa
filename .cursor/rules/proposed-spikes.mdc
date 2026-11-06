@@ -1,0 +1,35 @@
+---
+description: A set of proposed spikes is not an open spike and not a roadmap
+alwaysApply: true
+---
+
+# Proposed spikes
+
+`proposed-spikes.yaml` holds one set of proposals and follows `proposed-spikes.template.yaml`. Each item is one proposed spike. The file is not a spike contract, not a result record, and not permission to change the project.
+
+- A proposal has no `status`. It is not `open`, `closed`, or `dropped`.
+- Keep result fields off the set: no `created`, `closed`, or `documentation`.
+- Each proposal has one `goal.statement`, one `source.question`, and a non-empty `out_of_scope`.
+- The user decides which proposal, if any, becomes the next spike. Do not open one on your own.
+- Opening copies that proposal into a new `spikes/sN.yaml` and sets `status: open`. The set does not bypass the one-open-spike gate.
+- With no open spike, writing `proposed-spikes.yaml` is allowed. Other project files stay unchanged until a spike is open.
+
+```yaml
+# ❌ a second contract, or a sequence treated as the plan of record
+status: open
+documentation:
+  decision: |
+    Ship these three in order.
+
+# ✅ one proposal inside the set
+id: ""
+title: ""
+goal:
+  statement: |
+    <one outcome in the project>
+  out_of_scope:
+    - "<excluded work>"
+source:
+  question: |
+    <exactly one unknown>
+```

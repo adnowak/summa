@@ -1,0 +1,34 @@
+id: ""                        # s1, s2, …
+title: ""
+status: "open"                # open | closed | dropped
+created: ""                   # YYYY-MM-DD
+closed: ""
+
+goal:
+  statement: |
+    # one outcome in the target project
+  done_when:
+    - ""                      # a check a person can run or read
+  out_of_scope:
+    - ""                      # required, non-empty, before work starts
+
+source:
+  adr: []                     # vibes ADR ids, e.g. ["0001"]
+  keep: []                    # items from the phase-2 keep set
+  question: |
+    # the one unknown this spike may answer
+
+constraints:
+  touches:
+    - ""                      # paths this spike may change
+  extra: []                   # bounds for this spike only; empty is allowed
+
+documentation:
+  decision: |
+    # filled when status becomes closed
+  evidence:
+    - ""                      # one line per done_when check
+  leftover:
+    - ""                      # what the next spike may start from
+  drop_reason: |
+    # filled only when status becomes dropped

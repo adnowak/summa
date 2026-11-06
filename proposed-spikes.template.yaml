@@ -1,0 +1,23 @@
+# Shape of one set of proposed spikes.
+# Each item is a proposal. It is not a spike contract and not a result record.
+# The user decides which item, if any, is copied into spikes/sN.yaml.
+
+proposals:
+  - id: ""                      # proposal id; sN is assigned only when opened
+    title: ""
+    goal:
+      statement: |
+        # one outcome in the target project
+      done_when:
+        - ""                    # a check a person can run or read
+      out_of_scope:
+        - ""                    # required, non-empty
+    source:
+      adr: []                   # vibes ADR ids, e.g. ["0001"]
+      keep: []                  # items from the phase-2 keep set
+      question: |
+        # the one unknown this proposal would answer
+    constraints:
+      touches:
+        - ""                    # paths this proposal would change
+      extra: []                 # bounds for this proposal only; empty is allowed

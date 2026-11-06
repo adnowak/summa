@@ -1,0 +1,65 @@
+---
+description: One open spike; the spike file is the contract and the result record
+alwaysApply: true
+---
+
+# Spike workflow
+
+`spikes/sN.yaml` describes the shape of one spike. It is both the contract and the result record. It is not a roadmap of future spikes.
+
+## Gate
+
+- At most one spike has `status: open`.
+- Create the next spike only after the previous one is `closed` or `dropped`.
+- Each spike lives in `spikes/sN.yaml` (`s1`, `s2`, …) and follows `spike.template.yaml`.
+- With no open spike, do not change project files. Exceptions: writing `spikes/sN.yaml` when the user has agreed to open, change, close, or drop that spike; writing `proposed-spikes.yaml` as the proposal set.
+- While a spike is `open`, change only paths in `constraints.touches`, plus that spike’s own `spikes/sN.yaml`. Update the spike file as the contract and the result record.
+
+## Contract before work
+
+- `goal.statement` — one outcome in the project.
+- `done_when` — checkable criteria (a command or a read).
+- `out_of_scope` — required and non-empty before work starts.
+- `source.question` — exactly one unknown.
+
+## Tests
+
+- Tests are local and do not call live models, search engines, or clusters.
+- A test that needs an external system is a command for the user to run. Do not run it against that system.
+
+## Close or drop
+
+- The user decides whether the spike is `closed` or `dropped`. Do not set either status on your own.
+- `closed`: set `documentation.decision` and one `documentation.evidence` entry for each `done_when` item.
+- `dropped`: set `documentation.drop_reason`.
+- `documentation.leftover` states only what the next spike may start from.
+
+```yaml
+# ❌ several later spikes written into this one
+goal:
+  statement: |
+    Outcome A, then outcome B, then outcome C.
+leftover:
+  - start outcome B
+  - start outcome C
+
+# ✅ one outcome; leftover is only a possible start for the next spike
+goal:
+  statement: |
+    <one outcome in the project>
+  done_when:
+    - "<command or readable check>"
+  out_of_scope:
+    - "<excluded work>"
+source:
+  question: |
+    <exactly one unknown>
+constraints:
+  touches:
+    - <path this spike may change>
+documentation:
+  evidence:
+    - "<result of the done_when check>"
+  leftover:
+    - "<fact the next spike may start from>"
+```

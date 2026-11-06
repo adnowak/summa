@@ -1,0 +1,20 @@
+---
+description: The user decides logic, architecture, scope, and acceptance
+alwaysApply: true
+---
+
+# Decision ownership
+
+The user decides business logic, architecture, scope, and acceptance criteria.
+
+The agent prepares boilerplate, proposals, implementation inside the approved scope, and verifiable evidence. The agent does not invent material expectations or product behavior on its own.
+
+- Mark a proposal as a proposal. Do not treat it as a decision.
+- When a decision required for the contract or for behavior is missing, stop and ask. Do not fill it in with an assumption.
+- Changing a spike contract requires the user's agreement. The contract is `goal` (including `statement`, `done_when`, `out_of_scope`), `source.question`, `constraints.touches`, and any other bound fixed for that spike.
+- Set `status: closed` or `status: dropped` only after the user decides.
+
+```text
+Proposal (not a decision): limit touches to src/foo.py.
+User decision (2026-11-06): touches are src/foo.py and tests/test_foo.py.
+```
