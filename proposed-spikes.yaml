@@ -1,0 +1,83 @@
+proposals:
+  - id: "1"
+    title: "External LLM agent with a web GUI"
+    goal:
+      statement: |
+        A web page accepts one user message and shows one reply that came from an external LLM.
+      done_when:
+        - "Open the page, send one message, and the page shows one reply from the external LLM."
+      out_of_scope:
+        - "A second turn, or a stored transcript."
+        - "The page editing the endpoint, the model name, or a key."
+        - "A streamed reply."
+    source:
+      adr: []
+      keep: []
+      question: |
+        Can an agent be built that uses an external LLM and has a web GUI?
+    constraints:
+      touches: []
+      extra: []
+
+  - id: "2"
+    title: "Deterministic tools the agent can call"
+    goal:
+      statement: |
+        The agent can call one deterministic tool, and the same arguments always produce the same result in the reply.
+      done_when:
+        - "Ask the agent to add the same two integers twice. Both replies show that sum."
+      out_of_scope:
+        - "A tool that reads a file or the clock."
+        - "A page for adding or editing tools."
+    source:
+      adr: []
+      keep: []
+      question: |
+        Can deterministic tools used by this agent be built?
+    constraints:
+      touches: []
+      extra:
+        - "The one tool is addition: two integers in, their sum out."
+
+  - id: "3"
+    title: "Knowledge modeled and managed in the GUI"
+    goal:
+      statement: |
+        A person can add, view, and edit one piece of knowledge in the web GUI. The piece has a label. The agent cites that knowledge as part of the answer whenever the subject of the question semantically fits that label.
+      done_when:
+        - "In the web GUI, add one piece with a label, see its text and label, edit them, and see the new values."
+        - "When the subject of the question semantically fits the label, the agent reply cites that knowledge as part of the answer."
+        - "When the subject does not semantically fit the label, the reply does not cite that knowledge."
+      out_of_scope:
+        - "Automatic extraction from a tool, the web, or the model."
+        - "A field besides the text and the label, a list of pieces, or search."
+        - "A separate piece per chat."
+    source:
+      adr: []
+      keep: []
+      question: |
+        Can the knowledge used by the agent be modeled and managed in the GUI?
+    constraints:
+      touches: []
+      extra: []
+
+  - id: "4"
+    title: "Hierarchy and credibility of knowledge"
+    goal:
+      statement: |
+        Each piece of knowledge has a tier and a rating. When two pieces conflict and their tiers differ, the higher tier is chosen. When two pieces conflict and their tier is the same, the model chooses between them and a conflict log records that conflict.
+      done_when:
+        - "Two conflicting pieces in different tiers: the higher tier is the one chosen."
+        - "Two conflicting pieces in the same tier: the model chooses between them, and a conflict log records that conflict."
+      out_of_scope:
+        - "A higher rating deciding a conflict inside one tier."
+        - "A tier or a rating computed from the text."
+        - "Editing a tier or a rating in the GUI."
+    source:
+      adr: []
+      keep: []
+      question: |
+        Can a hierarchy of knowledge and its credibility be defined?
+    constraints:
+      touches: []
+      extra: []
