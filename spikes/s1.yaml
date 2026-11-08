@@ -1,0 +1,44 @@
+id: "s1"
+title: "External LLM agent with a web GUI"
+status: "closed"
+created: "2026-11-08"
+closed: "2026-11-08"
+
+goal:
+  statement: |
+    A web page accepts one user message and shows one reply that came from an external LLM.
+  done_when:
+    - "Open the page, send one message, and the page shows one reply from the external LLM."
+  out_of_scope:
+    - "A second turn, or a stored transcript."
+    - "The page editing the endpoint, the model name, or a key."
+    - "A streamed reply."
+
+source:
+  adr: []
+  keep: []
+  question: |
+    Can an agent be built that uses an external LLM and has a web GUI?
+
+constraints:
+  touches:
+    - "spikes/s1.yaml"
+    - "web/"
+  extra:
+    - "Minimal single-page UI plus a tiny local Node server."
+    - "Server POSTs one message to OpenRouter's OpenAI-compatible chat completions API (default https://openrouter.ai/api/v1)."
+    - "API key and model come from the environment (OPENROUTER_API_KEY, optional OPENROUTER_BASE_URL and OPENROUTER_MODEL); not editable in the page."
+
+documentation:
+  decision: |
+    Approved
+  evidence:
+    - |
+      Local check (mock OpenAI-compatible upstream, no live model):
+      `OPENROUTER_API_KEY=test-key OPENROUTER_BASE_URL=http://127.0.0.1:9999/v1 OPENROUTER_MODEL=mock-model PORT=3456 node web/server.mjs`
+      with a local mock on :9999 returning one completion.
+      GET / → 200 HTML; POST /api/chat {"message":"Hello Summa"} → {"reply":"Mock reply: hello from external LLM path."}.
+      Live done_when check: owner approved after running with OPENROUTER_API_KEY (`cd web && npm start`, open the page, send one message, see one OpenRouter reply).
+  leftover:
+    - "web/ serves a one-shot OpenRouter chat page; key and model are env-only (OPENROUTER_API_KEY, optional OPENROUTER_BASE_URL / OPENROUTER_MODEL)."
+  drop_reason: |
