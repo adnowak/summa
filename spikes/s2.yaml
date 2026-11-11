@@ -1,0 +1,41 @@
+id: "s2"
+title: "Deterministic tools the agent can call"
+status: "open"
+created: "2026-11-09"
+closed: ""
+
+goal:
+  statement: |
+    The agent can call one deterministic tool, and the same arguments always produce the same result in the reply.
+  done_when:
+    - "Ask the agent to add the same two integers twice. Both replies show that sum."
+  out_of_scope:
+    - "A tool that reads a file or the clock."
+    - "A page for adding or editing tools."
+    - "The OpenRouter response-healing plugin."
+    - "A provider tools API."
+
+source:
+  adr: []
+  keep: []
+  question: |
+    Can deterministic tools used by this agent be built?
+
+constraints:
+  touches:
+    - "spikes/s2.yaml"
+    - "web/"
+  extra:
+    - "The one tool is local addition of two JavaScript bigints. The reply is the decimal digits of the sum."
+    - |
+      The model returns {"tool":"add","a":<integer>,"b":<integer>}. a and b stay JSON integers and are read from the raw completion text as bigint.
+    - "The chat completions request includes response_format json_schema add_call with strict true, and provider.require_parameters true."
+    - "Incorrect syntax is returned to the model for up to 3 repairs."
+    - |
+      After 3 failed repairs, POST /api/chat returns 502 and {"error":"The model did not return a valid add call."}.
+
+documentation:
+  decision: |
+  evidence: []
+  leftover: []
+  drop_reason: |

@@ -9,7 +9,9 @@
   <body>
     <main>
       <h1>Summa</h1>
-      <p class="lede">Send one message. Get one reply from the external LLM.</p>
+      <p class="lede">
+        Send one message asking to add two integers. The reply shows that sum.
+      </p>
       <form id="chat-form">
         <label for="message">Message</label>
         <textarea
@@ -17,7 +19,7 @@
           name="message"
           rows="4"
           required
-          placeholder="Ask something…"
+          placeholder="Add 2 and 3"
         ></textarea>
         <button type="submit" id="send">Send</button>
       </form>

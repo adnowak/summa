@@ -2,6 +2,7 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { runChat } from "./chat.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, "public");
@@ -61,51 +62,15 @@ async function handleChat(req, res) {
     return;
   }
 
-  let upstream;
-  try {
-    upstream = await fetch(`${baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": referer,
-        "X-Title": appTitle,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: "user", content: message }],
-        stream: false,
-      }),
-    });
-  } catch (err) {
-    sendJson(res, 502, {
-      error: `Failed to reach the external LLM: ${err.message}`,
-    });
-    return;
-  }
-
-  let data;
-  try {
-    data = await upstream.json();
-  } catch {
-    sendJson(res, 502, { error: "External LLM returned a non-JSON response." });
-    return;
-  }
-
-  if (!upstream.ok) {
-    const detail =
-      (data && (data.error?.message || data.error)) || upstream.statusText;
-    sendJson(res, 502, { error: `External LLM error: ${detail}` });
-    return;
-  }
-
-  const reply = data?.choices?.[0]?.message?.content;
-  if (typeof reply !== "string" || !reply.trim()) {
-    sendJson(res, 502, { error: "External LLM returned no reply text." });
-    return;
-  }
-
-  sendJson(res, 200, { reply });
+  const result = await runChat({
+    message,
+    apiKey,
+    model,
+    baseUrl,
+    referer,
+    appTitle,
+  });
+  sendJson(res, result.status, result.body);
 }
 
 function serveStatic(req, res) {
@@ -148,6 +113,13 @@ const server = http.createServer(async (req, res) => {
   res.end("Method not allowed");
 });
 
-server.listen(port, () => {
-  console.log(`Summa web listening on http://127.0.0.1:${port}`);
-});
+const isMain =
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
+
+if (isMain) {
+  server.listen(port, () => {
+    const actual = server.address().port;
+    console.log(`Summa web listening on http://127.0.0.1:${actual}`);
+  });
+}
