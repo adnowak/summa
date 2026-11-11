@@ -3,6 +3,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { runChat } from "./chat.mjs";
+import {
+  cleanStatement,
+  opensearchConfigFromEnv,
+  readStatement,
+  writeStatement,
+} from "./statement.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, "public");
@@ -14,6 +20,7 @@ const baseUrl = (
 const model = process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini";
 const referer = process.env.OPENROUTER_HTTP_REFERER || "http://127.0.0.1:3000";
 const appTitle = process.env.OPENROUTER_APP_TITLE || "Summa";
+const opensearch = opensearchConfigFromEnv();
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -62,6 +69,12 @@ async function handleChat(req, res) {
     return;
   }
 
+  const loaded = await readStatement(opensearch);
+  if (!loaded.ok) {
+    sendJson(res, loaded.status, { error: loaded.error });
+    return;
+  }
+
   const result = await runChat({
     message,
     apiKey,
@@ -69,8 +82,39 @@ async function handleChat(req, res) {
     baseUrl,
     referer,
     appTitle,
+    statement: loaded.statement,
   });
   sendJson(res, result.status, result.body);
+}
+
+async function handleReadKnowledge(res) {
+  const loaded = await readStatement(opensearch);
+  if (!loaded.ok) {
+    sendJson(res, loaded.status, { error: loaded.error });
+    return;
+  }
+  sendJson(res, 200, { statement: loaded.statement });
+}
+
+async function handleWriteKnowledge(req, res) {
+  let parsed;
+  try {
+    parsed = JSON.parse((await readBody(req)) || "{}");
+  } catch {
+    sendJson(res, 400, { error: "Request body must be JSON with label and text." });
+    return;
+  }
+  const cleaned = cleanStatement(parsed);
+  if (cleaned.error) {
+    sendJson(res, 400, { error: cleaned.error });
+    return;
+  }
+  const written = await writeStatement(opensearch, cleaned.statement);
+  if (!written.ok) {
+    sendJson(res, written.status, { error: written.error });
+    return;
+  }
+  sendJson(res, 200, { statement: written.statement });
 }
 
 function serveStatic(req, res) {
@@ -99,7 +143,19 @@ function serveStatic(req, res) {
 }
 
 const server = http.createServer(async (req, res) => {
-  if (req.method === "POST" && req.url === "/api/chat") {
+  const pathOnly = (req.url || "").split("?")[0];
+
+  if (req.method === "GET" && pathOnly === "/api/knowledge") {
+    await handleReadKnowledge(res);
+    return;
+  }
+
+  if (req.method === "PUT" && pathOnly === "/api/knowledge") {
+    await handleWriteKnowledge(req, res);
+    return;
+  }
+
+  if (req.method === "POST" && pathOnly === "/api/chat") {
     await handleChat(req, res);
     return;
   }

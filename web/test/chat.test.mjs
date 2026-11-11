@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { INVALID_ADD_CALL_ERROR, SYSTEM_PROMPT } from "../add-call.mjs";
-import { runChat } from "../chat.mjs";
+import { citationInstructions, runChat } from "../chat.mjs";
 
 const config = {
   apiKey: "test-key",
@@ -22,12 +22,13 @@ function completion(content) {
   };
 }
 
-async function runWith(scripted, message = "add 2 and 3") {
+async function runWith(scripted, message = "add 2 and 3", statement = null) {
   const calls = [];
   let index = 0;
   const result = await runChat({
     ...config,
     message,
+    statement,
     fetchImpl: async (url, init) => {
       calls.push({ url, init, body: JSON.parse(init.body) });
       const next = scripted[Math.min(index, scripted.length - 1)];
@@ -133,6 +134,41 @@ test("a network failure is returned without using a repair", async () => {
   assert.deepEqual(result, {
     status: 502,
     body: { error: "Failed to reach the external LLM: connect ECONNREFUSED" },
+  });
+  assert.equal(calls.length, 1);
+});
+
+test("a stored statement is one completion and the reply is the model text", async () => {
+  const statement = {
+    label: "office hours",
+    text: "The office is open 9:00 to 17:00.",
+  };
+  const reply = "Come by during office hours. The office is open 9:00 to 17:00.";
+  const { result, calls } = await runWith([completion(reply)], "When can I come by?", statement);
+
+  assert.deepEqual(result, { status: 200, body: { reply } });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].body.response_format, undefined);
+  assert.equal(calls[0].body.provider, undefined);
+  assert.equal(calls[0].body.stream, false);
+  assert.deepEqual(calls[0].body.messages[0], {
+    role: "system",
+    content: citationInstructions(statement),
+  });
+  assert.match(calls[0].body.messages[0].content, /Label: office hours/);
+  assert.match(calls[0].body.messages[0].content, /Text: The office is open 9:00 to 17:00\./);
+  assert.deepEqual(calls[0].body.messages[1], {
+    role: "user",
+    content: "When can I come by?",
+  });
+});
+
+test("an empty citation reply is an error", async () => {
+  const statement = { label: "office hours", text: "The office is open 9:00 to 17:00." };
+  const { result, calls } = await runWith([completion("  ")], "When can I come by?", statement);
+  assert.deepEqual(result, {
+    status: 502,
+    body: { error: "External LLM returned no reply text." },
   });
   assert.equal(calls.length, 1);
 });

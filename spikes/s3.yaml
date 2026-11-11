@@ -1,0 +1,48 @@
+id: "s3"
+title: "Knowledge modeled and managed in the GUI"
+status: "closed"
+created: "2026-11-11"
+closed: "2026-11-11"
+
+goal:
+  statement: |
+    A person can add, view, and edit one piece of knowledge in the web GUI. The piece has a label. The agent cites that knowledge as part of the answer whenever the subject of the question semantically fits that label.
+  done_when:
+    - "In the web GUI, add one piece with a label, see its text and label, edit them, and see the new values."
+    - "When the subject of the question semantically fits the label, the agent reply cites that knowledge as part of the answer."
+    - "When the subject does not semantically fit the label, the reply does not cite that knowledge."
+  out_of_scope:
+    - "Automatic extraction from a tool, the web, or the model."
+    - "A field besides the text and the label, a list of pieces, or search."
+    - "A separate piece per chat."
+
+source:
+  adr: []
+  keep: []
+  question: |
+    Can the knowledge used by the agent be modeled and managed in the GUI?
+
+constraints:
+  touches:
+    - "spikes/s3.yaml"
+    - "web/"
+    - "docker-compose.yml"
+  extra:
+    - "A citation is exact. The reply contains the stored label and the stored text. When the subject does not fit the label, those strings are absent."
+    - "The statement is stored in OpenSearch. Index knowledge, document id statement, fields label and text. The cluster URL comes from the environment."
+
+documentation:
+  decision: |
+    Approved
+  evidence:
+    - |
+      Owner, 2026-11-11, web GUI on a live OpenSearch: saved label "office hours" and text "the office hours are 6 to 7", and both were shown under Saved. Edit check against the local mock: saved "office hours" / "The office is open 9:00 to 17:00.", replaced both fields with "desk" / "The desk faces the window.", and a new browser tab loaded the edited values. `cd web && npm test` saves, replaces, restarts the server, and reads the new values from the mock OpenSearch.
+    - |
+      Owner, 2026-11-11, live model. Label "office hours", text "the office hours are 6 to 7". Question "can I come to office at 5?". Reply "The office hours are 6 to 7." Owner approved that reply.
+    - |
+      A live question whose subject does not fit the label was not part of this approval. The earlier "what time is it?" reply that cited "desk" came from the local mock, which always printed the label and the text, and the owner rejected that reply.
+  leftover:
+    - "web/ stores one statement in OpenSearch at index knowledge, document id statement, fields label and text. docker-compose.yml runs that cluster on port 9200 with the security plugin off."
+    - "With no statement, POST /api/chat is the add tool and the reply is the decimal sum. With a statement, one completion carries the label, the text, and the citation rule, and the page shows the model text."
+    - "The approved live reply normalized the stored text: \"The office hours are 6 to 7.\" for \"the office hours are 6 to 7\"."
+  drop_reason: |

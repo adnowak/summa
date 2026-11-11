@@ -10,8 +10,23 @@
     <main>
       <h1>Summa</h1>
       <p class="lede">
-        Send one message asking to add two integers. The reply shows that sum.
+        Save one statement. With none saved, ask to add two integers and the reply shows that sum.
+        With a statement saved, the reply is the model's answer.
       </p>
+      <section>
+        <h2>Knowledge</h2>
+        <form id="knowledge-form">
+          <label for="knowledge-label">Label</label>
+          <input id="knowledge-label" name="label" type="text" required />
+          <label for="knowledge-text">Text</label>
+          <textarea id="knowledge-text" name="text" rows="4" required></textarea>
+          <button type="submit" id="save">Save</button>
+        </form>
+        <p id="knowledge-error" role="status"></p>
+        <h2>Saved</h2>
+        <p id="saved-label">No statement saved.</p>
+        <pre id="saved-text" hidden></pre>
+      </section>
       <form id="chat-form">
         <label for="message">Message</label>
         <textarea
