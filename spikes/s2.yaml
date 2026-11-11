@@ -1,8 +1,8 @@
 id: "s2"
 title: "Deterministic tools the agent can call"
-status: "open"
+status: "closed"
 created: "2026-11-09"
-closed: ""
+closed: "2026-11-11"
 
 goal:
   statement: |
@@ -36,6 +36,10 @@ constraints:
 
 documentation:
   decision: |
-  evidence: []
-  leftover: []
+    Closed
+  evidence:
+    - |
+      Local check (mock completion endpoint, no live model): headless Chrome, submit "add 2 and 3" twice. Both replies are "5".
+  leftover:
+    - "web/ asks OpenRouter for one add call record (response_format add_call, strict, require_parameters). Integer tokens are read as bigint from the raw completion. Local add returns the decimal sum. Up to 3 syntax repairs, then 502 with {\"error\":\"The model did not return a valid add call.\"}."
   drop_reason: |
